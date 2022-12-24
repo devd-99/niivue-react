@@ -38,6 +38,9 @@ export default function NiiVue(props) {
   const [worldSpace, setWorldSpace] = React.useState(nv.opts.isSliceMM)
   const [clipPlane, setClipPlane] = React.useState(nv.currentClipPlaneIndex > 0 ? true : false)
   // TODO: add crosshair size state and setter
+  const [drawingEnabled, setDrawingEnabled] = React.useState(nv.opts.drawingEnabled)
+  const [drawPen, setDrawPen] = React.useState(nv.opts.drawPen)
+  const [drawOpacity, setDrawOpacity] = React.useState(0.8)
   const [crosshairOpacity, setCrosshairOpacity] = React.useState(nv.opts.crosshairColor[3])
   const [clipPlaneOpacity, setClipPlaneOpacity] = React.useState(nv.opts.clipPlaneColor[3])
   const [locationTableVisible, setLocationTableVisible] = React.useState(true)
@@ -111,6 +114,30 @@ export default function NiiVue(props) {
 
   function toggleLocationTable(){
     setLocationTableVisible(!locationTableVisible)
+  }
+
+  function nvSaveImage() {
+    nv.saveImage('roi.nii', true)
+  }
+
+  function nvUpdateDrawingEnabled(){
+    setDrawingEnabled(!drawingEnabled)
+    nv.setDrawingEnabled(!drawingEnabled)
+    nv.drawScene()
+  }
+
+  function nvUpdateDrawPen(a) {
+    setDrawPen(a.target.value)
+    let penValue = a.target.value
+    nv.setPenValue(penValue & 7, penValue > 7)
+    if (penValue == 12) {
+      nv.setPenValue(-0)
+    }
+  }
+
+  function nvUpdateDrawOpacity(a) {
+    setDrawOpacity(a)
+    nv.setDrawOpacity(a)
   }
 
   function nvUpdateCrosshairColor(rgb01, a=1){
@@ -412,10 +439,43 @@ export default function NiiVue(props) {
           step={0.1}
         >
         </NumberPicker>
+        <NumberPicker
+          value={drawOpacity}
+          onChange={nvUpdateDrawOpacity}
+          title={'Draw Opacity'}
+          min={0}
+          max={1}
+          step={0.01}
+        >
+        </NumberPicker>
+        <label htmlFor="drawPen">Draw color:</label>
+        <select name="drawPen" id="drawPen" onChange={nvUpdateDrawPen} defaultValue={drawPen}>
+          <option value="0">Erase</option>
+          <option value="1">Red</option>
+          <option value="2">Green</option>
+          <option value="3">Blue</option>
+          <option value="8">Filled Erase</option>
+          <option value="9">Filled Red</option>
+          <option value="10">Filled Green</option>
+          <option value="11">Filled Blue</option>
+          <option value="12">Erase Selected Cluster</option>
+        </select>
+        <Button
+          title={'Save image'}
+          onClick={nvSaveImage}
+        >
+          Save image
+        </ Button>
         <NVSwitch
           checked={locationTableVisible}
           title={'Location table'}
           onChange={toggleLocationTable}
+        >
+        </NVSwitch>
+        <NVSwitch
+          checked={drawingEnabled}
+          title={'Enable drawing'}
+          onChange={nvUpdateDrawingEnabled}
         >
         </NVSwitch>
         <NVSwitch
