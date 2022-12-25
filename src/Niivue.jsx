@@ -91,6 +91,7 @@ export default function NiiVue(props) {
         image={layer}
         onColorMapChange={nvUpdateColorMap}
         onRemoveLayer={nvRemoveLayer}
+        onOpacityChange={nvUpdateLayerOpacity}
         colorMapValues={nv.colormapFromKey(layer.colorMap)}
         getColorMapValues={(colorMapName)=>{return nv.colormapFromKey(colorMapName)}}
       />
@@ -337,6 +338,10 @@ export default function NiiVue(props) {
     } else if (newSliceType === '3d'){
       nv.setSliceType(nv.sliceTypeRender)
     }
+  }
+
+  function nvUpdateLayerOpacity(a) {
+    nv.updateGLVolume()
   }
 
   function nvUpdateColorMap(id, clr){

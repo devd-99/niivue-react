@@ -11,6 +11,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import { NumberPicker } from './NumberPicker.jsx'
 import React from 'react'
 import { display } from "@mui/system";
 
@@ -32,6 +33,7 @@ export default function Layer(props) {
   const image = props.image
   const [detailsOpen, setDetailsOpen] = React.useState(false)
   const [color, setColor] = React.useState(image.colorMap)
+  const [opacity, setOpacity] = React.useState(1.0)
   let ArrowIcon = detailsOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
   console.log(props.colorMapValues)
   let allColors = image.colorMaps().map((colorName) => {
@@ -86,6 +88,12 @@ export default function Layer(props) {
 
   function handleDelete() {
     props.onRemoveLayer(image)
+  }
+
+  function handleOpacityChanged(a) {
+    setOpacity(a)
+    image.opacity = a
+    props.onOpacityChange(a)
   }
 
   return (
@@ -161,6 +169,24 @@ export default function Layer(props) {
               <KeyboardDoubleArrowDownIcon />
             </IconButton>
 
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              width: '100%',
+            }}
+          >
+            <NumberPicker
+              value={opacity}
+              onChange={handleOpacityChanged}
+              title={'Opacity'}
+              min={0}
+              max={1}
+              step={0.01}
+            >
+            </NumberPicker>
           </Box>
           <Box
             sx={{
