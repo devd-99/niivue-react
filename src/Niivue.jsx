@@ -38,6 +38,7 @@ export default function NiiVue(props) {
   const [worldSpace, setWorldSpace] = React.useState(nv.opts.isSliceMM)
   const [clipPlane, setClipPlane] = React.useState(nv.currentClipPlaneIndex > 0 ? true : false)
   // TODO: add crosshair size state and setter
+  const [opacity, setopacity] = React.useState(1.0)
   const [drawingEnabled, setDrawingEnabled] = React.useState(nv.opts.drawingEnabled)
   const [drawPen, setDrawPen] = React.useState(nv.opts.drawPen)
   const [drawOpacity, setDrawOpacity] = React.useState(0.8)
@@ -114,6 +115,16 @@ export default function NiiVue(props) {
 
   function toggleLocationTable(){
     setLocationTableVisible(!locationTableVisible)
+  }
+
+  function nvUpdateOpacity(a) {
+    console.log("Opacity = " + a)
+    setopacity(a)
+    let n = nv.volumes.length
+    for (let i = 0; i < n; i++) {
+      nv.volumes[i].opacity = a
+    }
+    nv.updateGLVolume()
   }
 
   function nvSaveImage() {
@@ -437,6 +448,15 @@ export default function NiiVue(props) {
           min={0}
           max={1}
           step={0.1}
+        >
+        </NumberPicker>
+        <NumberPicker
+          value={opacity}
+          onChange={nvUpdateOpacity}
+          title={'Opacity'}
+          min={0}
+          max={1}
+          step={0.01}
         >
         </NumberPicker>
         <NumberPicker
