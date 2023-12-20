@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<X3D>
+    <Scene>
+        <Shape>
+            <Appearance>
+                <Material diffuseColor="1 0 0" /> <!-- Basic red color -->
+            </Appearance>
+            <Sphere radius="5.0" /> <!-- Unit-sized sphere -->
+        </Shape>
+    </Scene>
+</X3D>

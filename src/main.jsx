@@ -11,7 +11,7 @@ import '@fontsource/roboto/700.css';
 
 const volumes = [
   {url: './mni152reallyreallyreallyreallyreallyLongName.nii'},
-  {url: './hippo.nii'},
+  {url: './hippo.nii'}
   
 ]
 ReactDOM.render(

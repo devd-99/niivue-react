@@ -4,7 +4,7 @@ import { Box } from '@mui/material'
 import { Fade} from '@mui/material'
 import { Popper } from '@mui/material'
 import { Paper } from '@mui/material'
-import { Niivue, NVImage} from '@niivue/niivue'
+import { Niivue, NVImage} from '@niivue/niivuem'
 import Toolbar from './components/Toolbar.jsx'
 import {SettingsPanel} from './components/SettingsPanel.jsx'
 import {ColorPicker} from './components/ColorPicker.jsx'
@@ -40,7 +40,7 @@ export default function NiiVue(props) {
   // TODO: add crosshair size state and setter
   const [opacity, setopacity] = React.useState(1.0)
   const [drawingEnabled, setDrawingEnabled] = React.useState(nv.opts.drawingEnabled)
-  const [drawPen, setDrawPen] = React.useState(nv.opts.drawPen)
+  const [drawPen, setDrawPen] = React.useState(1)
   const [drawOpacity, setDrawOpacity] = React.useState(0.8)
   const [crosshairOpacity, setCrosshairOpacity] = React.useState(nv.opts.crosshairColor[3])
   const [clipPlaneOpacity, setClipPlaneOpacity] = React.useState(nv.opts.clipPlaneColor[3])
@@ -60,6 +60,11 @@ export default function NiiVue(props) {
   const [rulerOpacity, setRulerOpacity] = React.useState(nv.opts.rulerColor[3])
   const [highDPI, setHighDPI] = React.useState(false)
 
+  // autofill
+  const [autofillEnabled, setAutofillEnabled] = React.useState(false)
+  
+  const [dragAndDropEnabled, setDragAndDropEnabled] = React.useState(nv.opts.dragAndDropEnabled)
+
   // only run this when the component is mounted on the page
   // or else it will be recursive and continuously add all
   // initial images supplied to the NiiVue component
@@ -73,6 +78,11 @@ export default function NiiVue(props) {
     //   setLayers([...nv.volumes])
     // })
     await nv.loadVolumes(props.volumes)
+
+    for ( let v in props.volumes){
+      console.log("volume:",v)
+    }
+
     setLayers([...nv.volumes])
   }, [])
 
@@ -85,6 +95,7 @@ export default function NiiVue(props) {
   }
   // construct an array of <Layer> components. Each layer is a NVImage or NVMesh 
   const layerList = layers.map((layer) => {
+    // console.log("layer:", layer.name)
     return (
       <Layer 
         key={layer.name} 
@@ -92,11 +103,62 @@ export default function NiiVue(props) {
         onColorMapChange={nvUpdateColorMap}
         onRemoveLayer={nvRemoveLayer}
         onOpacityChange={nvUpdateLayerOpacity}
-        colorMapValues={nv.colormapFromKey(layer.colorMap)}
+        // colorMapValues={nv.colormapFromKey(layer.colorMap)}
         getColorMapValues={(colorMapName)=>{return nv.colormapFromKey(colorMapName)}}
       />
     )
   })
+
+  function handleSphereButton() {
+
+    nv.loadFromUrlManual('./sphere_basic.x3d')
+
+    for(let m in nv.meshes){
+      for (let key in m) {
+        if (m.hasOwnProperty(key)) {
+          console.log(key + ": " + m[key]);
+        }
+      }
+    }
+
+  }
+
+  function handleXPlus() {
+    // Define what happens when the new button is clicked
+    console.log('X+ Clicked');
+    nv.updateAllMeshVertices("x+");
+
+  }
+  function handleXMinus() {
+    // Define what happens when the new button is clicked
+    console.log('X- Clicked');
+    nv.updateAllMeshVertices("x-");
+
+  }
+  function handleYPlus() {
+    // Define what happens when the new button is clicked
+    console.log('Y+ Clicked');
+    nv.updateAllMeshVertices("y+");
+
+  }
+  function handleYMinus() {
+    // Define what happens when the new button is clicked
+    console.log('Y+ Clicked');
+    nv.updateAllMeshVertices("y-");
+
+  }
+  function handleZPlus() {
+    // Define what happens when the new button is clicked
+    console.log('Z+ Clicked');
+    nv.updateAllMeshVertices("z+");
+
+  }
+  function handleZMinus() {
+    // Define what happens when the new button is clicked
+    console.log('Z- Clicked');
+    nv.updateAllMeshVertices("z-");
+
+  }
 
   async function addLayer(file){
     const nvimage = await NVImage.loadFromFile({
@@ -138,10 +200,17 @@ export default function NiiVue(props) {
     nv.drawScene()
   }
 
+  function nvUpdateAutofill() {
+    console.log("drawpen val: ", drawPen)
+    nv.setPenValue(drawPen, !autofillEnabled)
+    setAutofillEnabled(!autofillEnabled)
+  }
+
   function nvUpdateDrawPen(a) {
     setDrawPen(a.target.value)
+    console.log("drawpen val: " +drawPen + a.target.value)
     let penValue = a.target.value
-    nv.setPenValue(penValue & 7, penValue > 7)
+    nv.setPenValue(penValue & 7, autofillEnabled)
     if (penValue == 12) {
       nv.setPenValue(-0)
     }
@@ -357,6 +426,8 @@ export default function NiiVue(props) {
 		//setIntensityRange(nvimage)
 	})
 
+
+
   return (
     <Box sx={{
       display: 'flex',
@@ -474,7 +545,7 @@ export default function NiiVue(props) {
         >
         </NumberPicker>
         <label htmlFor="drawPen">Draw color:</label>
-        <select name="drawPen" id="drawPen" onChange={nvUpdateDrawPen} defaultValue={drawPen}>
+        <select name="drawPen" id="drawPen" onChange={nvUpdateDrawPen} defaultValue={1}>
           <option value="0">Erase</option>
           <option value="1">Red</option>
           <option value="2">Green</option>
@@ -503,6 +574,11 @@ export default function NiiVue(props) {
           onChange={nvUpdateDrawingEnabled}
         >
         </NVSwitch>
+        <NVSwitch
+          checked={autofillEnabled}
+          title={'Autofill'}
+          onChange={nvUpdateAutofill}
+        ></NVSwitch>
         <NVSwitch
           checked={orientCube}
           title={'Orientation cube'}
@@ -629,6 +705,51 @@ export default function NiiVue(props) {
         toggleLayers={toggleLayers}
       >
       </Toolbar>
+      <Button
+          onClick={handleSphereButton}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          Add sphere
+        </Button>
+
+        <Button
+          onClick={handleXPlus}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          x+
+        </Button>
+        <Button
+          onClick={handleXMinus}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          x-
+        </Button>
+        <Button
+          onClick={handleYPlus}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          y+
+        </Button>
+        <Button
+          onClick={handleYMinus}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          y-
+        </Button>
+        <Button
+          onClick={handleZPlus}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          z+
+        </Button>
+        <Button
+          onClick={handleZMinus}
+          style={{ marginLeft: 'auto' }} // This positions the button to the right side
+        >
+          z-
+        </Button>
+
+
       <NiivuePanel
         nv={nv}
         volumes={layers}
